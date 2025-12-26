@@ -3,52 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSA Logic Tutor</title>
+    <title>DSA Logic Tutor Pro</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #1e1e1e;
-            color: #fff;
+            background-color: #121212; /* Deep Dark Background */
+            color: #e0e0e0;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
-        .container { width: 100%; max-width: 900px; }
-        h1 { text-align: center; color: #61dafb; }
-        .controls { display: flex; gap: 10px; margin-bottom: 15px; }
-        select, button {
-            padding: 10px; border: none; border-radius: 5px; font-size: 16px;
+        .container { width: 100%; max-width: 1000px; }
+        
+        /* HEADER */
+        h1 { 
+            text-align: center; 
+            color: #bd93f9; /* Dracula Purple */
+            margin-bottom: 20px;
+            font-weight: 700;
         }
-        button { background-color: #61dafb; cursor: pointer; color: #000; font-weight: bold; flex-grow: 1;}
-        button:hover { background-color: #4fa8d1; }
-        textarea {
-            width: 100%; height: 300px; background: #252526; color: #dcdcdc;
-            border: 1px solid #3e3e42; padding: 15px; font-family: monospace;
-            font-size: 14px; box-sizing: border-box; resize: vertical;
+
+        /* CONTROLS */
+        .controls { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 15px; 
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
         }
+        select {
+            padding: 12px; 
+            border: 1px solid #444; 
+            border-radius: 6px; 
+            font-size: 14px;
+            background: #252526;
+            color: #fff;
+            cursor: pointer;
+        }
+        button { 
+            background-color: #50fa7b; /* Dracula Green */
+            color: #000; 
+            font-weight: bold; 
+            flex-grow: 1;
+            padding: 12px; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover { 
+            background-color: #40d66d; 
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* EDITOR (CodeMirror overrides) */
+        .editor-container {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .CodeMirror {
+            height: 400px; /* Taller editor */
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        /* RESULTS AREA */
         .results {
-            display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            margin-top: 25px;
         }
         .card {
-            background: #333; padding: 20px; border-radius: 8px; flex: 1; min-width: 200px;
+            background: #1e1e1e; 
+            padding: 20px; 
+            border-radius: 8px; 
+            flex: 1; 
+            min-width: 250px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .full-width { flex-basis: 100%; }
-        h3 { margin-top: 0; color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
-        p { font-size: 18px; font-weight: bold; color: #fff; }
         
-        #debugInfo ul, #optimizationTips ul { padding-left: 20px; margin: 0; }
-        #debugInfo li, #optimizationTips li { margin-bottom: 8px; line-height: 1.5; color: #e0e0e0; }
-        #debugInfo strong { color: #ff6b6b; } 
-        #optimizationTips strong { color: #61dafb; } 
+        h3 { 
+            margin-top: 0; 
+            color: #8be9fd; /* Dracula Cyan */
+            font-size: 13px; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        p { font-size: 16px; color: #f8f8f2; line-height: 1.6; }
+        
+        /* LIST STYLES */
+        ul { padding-left: 20px; margin: 0; }
+        li { margin-bottom: 10px; line-height: 1.6; color: #dcdcdc; }
+        
+        /* HIGHLIGHTS */
+        strong { color: #ff79c6; } /* Pink for emphasis */
+        .card-red { border-left: 4px solid #ff5555; } /* Red for bugs */
+        .card-blue { border-left: 4px solid #8be9fd; } /* Cyan for tips */
+        
+        /* LOADING ANIMATION */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.3);
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>DSA Logic Tutor</h1>
+        <h1>⚡ DSA Logic Tutor</h1>
         
         <div class="controls">
-            <select id="language">
+            <select id="language" onchange="changeMode()">
                 <option value="Python">Python</option>
                 <option value="JavaScript">JavaScript</option>
                 <option value="C">C</option>
@@ -59,7 +155,7 @@
         </div>
 
         <div class="editor-container">
-            <textarea id="codeInput" placeholder="Paste your Brute Force code here..."></textarea>
+            <textarea id="codeInput"></textarea>
         </div>
 
         <div class="results" id="resultsArea" style="display: none;">
@@ -72,31 +168,57 @@
                 <p id="spaceComp">...</p>
             </div>
             
-            <div class="card full-width">
+            <div class="card full-width card-red">
                 <h3>Debugging & Logical Errors</h3>
                 <div id="debugInfo">...</div>
             </div>
 
-            <div class="card full-width" style="border-left: 5px solid #61dafb;">
+            <div class="card full-width card-blue">
                 <h3>Optimization Strategy (Hint)</h3>
                 <div id="optimizationTips">...</div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+
     <script>
+        // 1. Initialize CodeMirror (VS Code style editor)
+        var editor = CodeMirror.fromTextArea(document.getElementById("codeInput"), {
+            lineNumbers: true,
+            mode: "python", // Default mode
+            theme: "dracula",
+            indentUnit: 4,
+            matchBrackets: true
+        });
+
+        // Helper to switch syntax highlighting based on dropdown
+        function changeMode() {
+            var lang = document.getElementById("language").value;
+            if (lang === "Python") editor.setOption("mode", "python");
+            else if (lang === "JavaScript") editor.setOption("mode", "javascript");
+            else if (lang === "Java") editor.setOption("mode", "text/x-java");
+            else if (lang === "C") editor.setOption("mode", "text/x-csrc");
+            else if (lang === "C++") editor.setOption("mode", "text/x-c++src");
+        }
+
         async function analyzeCode() {
-            const code = document.getElementById('codeInput').value;
+            // Get code from CodeMirror editor instead of textarea
+            const code = editor.getValue();
             const language = document.getElementById('language').value;
             const btn = document.getElementById('analyzeBtn');
             const resultsArea = document.getElementById('resultsArea');
 
             if (!code.trim()) {
-                alert("Please enter some code first.");
+                alert("Please write some code first!");
                 return;
             }
 
-            btn.innerText = "Thinking...";
+            // Loading State
+            btn.innerHTML = '<div class="spinner"></div> Thinking...';
             btn.disabled = true;
             resultsArea.style.display = 'none';
 
