@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Logic Tutor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container { width: 100%; max-width: 900px; }
+        h1 { text-align: center; color: #61dafb; }
+        .controls { display: flex; gap: 10px; margin-bottom: 15px; }
+        select, button {
+            padding: 10px; border: none; border-radius: 5px; font-size: 16px;
+        }
+        button { background-color: #61dafb; cursor: pointer; color: #000; font-weight: bold; flex-grow: 1;}
+        button:hover { background-color: #4fa8d1; }
+        textarea {
+            width: 100%; height: 300px; background: #252526; color: #dcdcdc;
+            border: 1px solid #3e3e42; padding: 15px; font-family: monospace;
+            font-size: 14px; box-sizing: border-box; resize: vertical;
+        }
+        .results {
+            display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;
+        }
+        .card {
+            background: #333; padding: 20px; border-radius: 8px; flex: 1; min-width: 200px;
+        }
+        .full-width { flex-basis: 100%; }
+        h3 { margin-top: 0; color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
+        p { font-size: 18px; font-weight: bold; color: #fff; }
+        
+        #debugInfo ul, #optimizationTips ul { padding-left: 20px; margin: 0; }
+        #debugInfo li, #optimizationTips li { margin-bottom: 8px; line-height: 1.5; color: #e0e0e0; }
+        #debugInfo strong { color: #ff6b6b; } 
+        #optimizationTips strong { color: #61dafb; } 
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DSA Logic Tutor</h1>
+        
+        <div class="controls">
+            <select id="language">
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="C">C</option>
+                <option value="C++">C++</option>
+                <option value="Java">Java</option>
+            </select>
+            <button onclick="analyzeCode()" id="analyzeBtn">Analyze Code</button>
+        </div>
+
+        <div class="editor-container">
+            <textarea id="codeInput" placeholder="Paste your Brute Force code here..."></textarea>
+        </div>
+
+        <div class="results" id="resultsArea" style="display: none;">
+            <div class="card">
+                <h3>Time Complexity</h3>
+                <p id="timeComp">...</p>
+            </div>
+            <div class="card">
+                <h3>Space Complexity</h3>
+                <p id="spaceComp">...</p>
+            </div>
+            
+            <div class="card full-width">
+                <h3>Debugging & Logical Errors</h3>
+                <div id="debugInfo">...</div>
+            </div>
+
+            <div class="card full-width" style="border-left: 5px solid #61dafb;">
+                <h3>Optimization Strategy (Hint)</h3>
+                <div id="optimizationTips">...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeCode() {
+            const code = document.getElementById('codeInput').value;
+            const language = document.getElementById('language').value;
+            const btn = document.getElementById('analyzeBtn');
+            const resultsArea = document.getElementById('resultsArea');
+
+            if (!code.trim()) {
+                alert("Please enter some code first.");
+                return;
+            }
+
+            btn.innerText = "Thinking...";
+            btn.disabled = true;
+            resultsArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, language: language })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server Error (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+                
+                let result;
+                try {
+                    result = JSON.parse(data.result);
+                } catch (e) {
+                    throw new Error("AI returned invalid data format.");
+                }
+
+                document.getElementById('timeComp').innerText = result.time_complexity;
+                document.getElementById('spaceComp').innerText = result.space_complexity;
+                document.getElementById('debugInfo').innerHTML = result.bugs;
+                document.getElementById('optimizationTips').innerHTML = result.optimization_tips || "No specific optimization tips provided.";
+                
+                resultsArea.style.display = 'flex';
+
+            } catch (error) {
+                alert("ERROR:\n" + error.message);
+                console.error(error);
+            } finally {
+                btn.innerText = "Analyze Code";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
