@@ -22,72 +22,63 @@ class CodeRequest(BaseModel):
     code: str
     language: str
 
-# SECURITY: Get key from Environment Variable (Safe for GitHub)
 MY_API_KEY = os.environ.get("GENAI_API_KEY")
 
-def extract_json(text):
-    """Helper to find JSON object inside AI response text"""
-    try:
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            return match.group(0)
-        return text 
-    except:
-        return text
+# Priority List: Genius -> Expert -> Fast -> Backup
+MODEL_PRIORITY_LIST = [
+    "gemini-3-flash",          
+    "gemini-2.5-flash",        
+    "gemini-2.5-flash-lite",   
+    "gemma-3-27b-it",          
+]
+
+def clean_json_text(text):
+    match = re.search(r'```json\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if match: return match.group(1)
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if match: return match.group(0)
+    return text
 
 @app.post("/analyze")
 async def analyze_code(request: CodeRequest):
     if not MY_API_KEY:
-        # This error happens if you forget to set the Key on Render
-        raise HTTPException(status_code=500, detail="Server Error: GENAI_API_KEY not set in environment variables.")
+        raise HTTPException(status_code=500, detail="Server Error: Key missing.")
 
-    try:
-        client = genai.Client(api_key=MY_API_KEY)
-        
-        prompt = f"""
-        Act as a strict DSA Tutor. The user is a student trying to learn, so DO NOT give them the full code solution.
-        Analyze this {request.language} code.
-        
-        Return ONLY a raw JSON object with these 4 keys:
-        {{
-            "time_complexity": "The Big O notation of the user's current code",
-            "space_complexity": "The Space complexity",
-            "bugs": "A readable HTML list (<ul><li>) of logical bugs or edge cases they missed.",
-            "optimization_tips": "A readable HTML list (<ul><li>) explaining the *logic* of a better approach (e.g., 'Try using Two Pointers instead of a nested loop'). Do not write code."
-        }}
-        
-        Code:
-        {request.code}
-        """
+    client = genai.Client(api_key=MY_API_KEY)
+    last_error = None
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash", 
-            contents=prompt
-        )
-        
-        raw_text = response.text
-        json_str = extract_json(raw_text)
-        
-        # Validate JSON
+    prompt = f"""
+    Act as a strict DSA Tutor. Analyze this {request.language} code.
+    Return ONLY valid JSON with keys: "time_complexity", "space_complexity", "bugs", "optimization_tips".
+    Code:
+    {request.code}
+    """
+
+    for model_name in MODEL_PRIORITY_LIST:
         try:
-            json.loads(json_str) 
-        except json.JSONDecodeError:
-            return {"result": json.dumps({
-                "time_complexity": "Error",
-                "space_complexity": "Error",
-                "bugs": "AI response was not valid JSON.",
-                "optimization_tips": "Could not parse AI response."
-            })}
+            print(f"Trying: {model_name}...") 
+            response = client.models.generate_content(model=model_name, contents=prompt)
+            cleaned_json = clean_json_text(response.text)
+            json.loads(cleaned_json) 
+            
+            # SUCCESS! Return result AND the model name
+            return {
+                "result": cleaned_json, 
+                "model_used": model_name 
+            }
 
-        return {"result": json_str}
+        except Exception as e:
+            print(f"Model {model_name} failed: {e}")
+            last_error = e
+            continue 
 
-    except Exception as e:
-        print(f"SERVER ERROR: {e}") 
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"result": json.dumps({
+        "time_complexity": "Error",
+        "bugs": f"All models failed. Last error: {str(last_error)}"
+    }), "model_used": "System Overload"}
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
-    # Render provides the port in an environment variable
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port)
