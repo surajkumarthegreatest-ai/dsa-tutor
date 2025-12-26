@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #121212; /* Deep Dark Background */
+            background-color: #121212;
             color: #e0e0e0;
             margin: 0;
             padding: 20px;
@@ -20,123 +20,72 @@
         }
         .container { width: 100%; max-width: 1000px; }
         
-        /* HEADER */
-        h1 { 
-            text-align: center; 
-            color: #bd93f9; /* Dracula Purple */
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
+        h1 { text-align: center; color: #bd93f9; font-weight: 700; margin-bottom: 20px; }
 
         /* CONTROLS */
         .controls { 
-            display: flex; 
-            gap: 15px; 
-            margin-bottom: 15px; 
-            background: #1e1e1e;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
+            display: flex; gap: 15px; margin-bottom: 15px; 
+            background: #1e1e1e; padding: 10px; border-radius: 8px; border: 1px solid #333;
         }
         select {
-            padding: 12px; 
-            border: 1px solid #444; 
-            border-radius: 6px; 
-            font-size: 14px;
-            background: #252526;
-            color: #fff;
-            cursor: pointer;
+            padding: 12px; border: 1px solid #444; border-radius: 6px; 
+            font-size: 14px; background: #252526; color: #fff; cursor: pointer;
         }
         button { 
-            background-color: #50fa7b; /* Dracula Green */
-            color: #000; 
-            font-weight: bold; 
-            flex-grow: 1;
-            padding: 12px; 
-            border: none; 
-            border-radius: 6px; 
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            background-color: #50fa7b; color: #000; font-weight: bold; flex-grow: 1;
+            padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;
+            transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
         }
-        button:hover { 
-            background-color: #40d66d; 
-            transform: translateY(-1px);
-        }
-        button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-            transform: none;
-        }
+        button:hover { background-color: #40d66d; transform: translateY(-1px); }
+        button:disabled { background-color: #555; cursor: not-allowed; }
 
-        /* EDITOR (CodeMirror overrides) */
+        /* EDITOR */
         .editor-container {
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #444;
+            border-radius: 8px; overflow: hidden; border: 1px solid #444;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .CodeMirror {
-            height: 400px; /* Taller editor */
-            font-size: 14px;
-            font-family: 'Consolas', 'Monaco', monospace;
+        .CodeMirror { height: 400px; font-size: 14px; font-family: 'Consolas', monospace; }
+
+        /* RESULTS HEADER WITH MODEL BADGE */
+        .results-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 25px; margin-bottom: 10px;
+        }
+        .model-badge {
+            font-size: 12px; font-weight: bold; padding: 5px 10px;
+            border-radius: 12px; background: #44475a; color: #f8f8f2;
+            display: none; /* Hidden until analysis is done */
+            border: 1px solid #6272a4;
+            box-shadow: 0 0 10px rgba(189, 147, 249, 0.2);
         }
 
-        /* RESULTS AREA */
-        .results {
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 15px; 
-            margin-top: 25px;
-        }
+        /* RESULTS */
+        .results { display: flex; flex-wrap: wrap; gap: 15px; }
         .card {
-            background: #1e1e1e; 
-            padding: 20px; 
-            border-radius: 8px; 
-            flex: 1; 
-            min-width: 250px;
-            border: 1px solid #333;
+            background: #1e1e1e; padding: 20px; border-radius: 8px; 
+            flex: 1; min-width: 250px; border: 1px solid #333;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .full-width { flex-basis: 100%; }
         
         h3 { 
-            margin-top: 0; 
-            color: #8be9fd; /* Dracula Cyan */
-            font-size: 13px; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
+            margin-top: 0; color: #8be9fd; font-size: 13px; text-transform: uppercase; 
+            letter-spacing: 1.5px; border-bottom: 1px solid #333; padding-bottom: 10px;
         }
         p { font-size: 16px; color: #f8f8f2; line-height: 1.6; }
-        
-        /* LIST STYLES */
         ul { padding-left: 20px; margin: 0; }
         li { margin-bottom: 10px; line-height: 1.6; color: #dcdcdc; }
         
-        /* HIGHLIGHTS */
-        strong { color: #ff79c6; } /* Pink for emphasis */
-        .card-red { border-left: 4px solid #ff5555; } /* Red for bugs */
-        .card-blue { border-left: 4px solid #8be9fd; } /* Cyan for tips */
+        strong { color: #ff79c6; }
+        .card-red { border-left: 4px solid #ff5555; }
+        .card-blue { border-left: 4px solid #8be9fd; }
         
-        /* LOADING ANIMATION */
         .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,0.3);
-            border-radius: 50%;
-            border-top-color: #000;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
+            display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3);
+            border-radius: 50%; border-top-color: #000; animation: spin 1s ease-in-out infinite;
+            margin-right: 10px; vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body>
@@ -158,6 +107,11 @@
             <textarea id="codeInput"></textarea>
         </div>
 
+        <div class="results-header" id="resultsHeader" style="display: none;">
+            <h2 style="margin:0; font-size: 20px;">Analysis Result</h2>
+            <span id="modelBadge" class="model-badge">AI Model: ...</span>
+        </div>
+
         <div class="results" id="resultsArea" style="display: none;">
             <div class="card">
                 <h3>Time Complexity</h3>
@@ -167,12 +121,10 @@
                 <h3>Space Complexity</h3>
                 <p id="spaceComp">...</p>
             </div>
-            
             <div class="card full-width card-red">
                 <h3>Debugging & Logical Errors</h3>
                 <div id="debugInfo">...</div>
             </div>
-
             <div class="card full-width card-blue">
                 <h3>Optimization Strategy (Hint)</h3>
                 <div id="optimizationTips">...</div>
@@ -186,16 +138,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
 
     <script>
-        // 1. Initialize CodeMirror (VS Code style editor)
         var editor = CodeMirror.fromTextArea(document.getElementById("codeInput"), {
-            lineNumbers: true,
-            mode: "python", // Default mode
-            theme: "dracula",
-            indentUnit: 4,
-            matchBrackets: true
+            lineNumbers: true, mode: "python", theme: "dracula", indentUnit: 4, matchBrackets: true
         });
 
-        // Helper to switch syntax highlighting based on dropdown
         function changeMode() {
             var lang = document.getElementById("language").value;
             if (lang === "Python") editor.setOption("mode", "python");
@@ -206,21 +152,19 @@
         }
 
         async function analyzeCode() {
-            // Get code from CodeMirror editor instead of textarea
             const code = editor.getValue();
             const language = document.getElementById('language').value;
             const btn = document.getElementById('analyzeBtn');
             const resultsArea = document.getElementById('resultsArea');
+            const resultsHeader = document.getElementById('resultsHeader');
+            const modelBadge = document.getElementById('modelBadge');
 
-            if (!code.trim()) {
-                alert("Please write some code first!");
-                return;
-            }
+            if (!code.trim()) { alert("Please write some code first!"); return; }
 
-            // Loading State
-            btn.innerHTML = '<div class="spinner"></div> Thinking...';
+            btn.innerHTML = '<div class="spinner"></div> Analyzing...';
             btn.disabled = true;
             resultsArea.style.display = 'none';
+            resultsHeader.style.display = 'none';
 
             try {
                 const response = await fetch('/analyze', {
@@ -229,30 +173,38 @@
                     body: JSON.stringify({ code: code, language: language })
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Server Error (${response.status}): ${errorText}`);
-                }
+                if (!response.ok) throw new Error("Server Error");
 
                 const data = await response.json();
                 
+                // Parse the result JSON
                 let result;
-                try {
-                    result = JSON.parse(data.result);
-                } catch (e) {
-                    throw new Error("AI returned invalid data format.");
-                }
+                try { result = JSON.parse(data.result); } catch (e) { throw new Error("Invalid AI Data"); }
 
+                // Fill Data
                 document.getElementById('timeComp').innerText = result.time_complexity;
                 document.getElementById('spaceComp').innerText = result.space_complexity;
                 document.getElementById('debugInfo').innerHTML = result.bugs;
-                document.getElementById('optimizationTips').innerHTML = result.optimization_tips || "No specific optimization tips provided.";
+                document.getElementById('optimizationTips').innerHTML = result.optimization_tips;
                 
+                // UPDATE MODEL BADGE
+                modelBadge.innerText = "⚡ Powered by: " + data.model_used;
+                modelBadge.style.display = "inline-block";
+                
+                // If it's Gemma, change color slightly to differentiate
+                if (data.model_used.includes("gemma")) {
+                    modelBadge.style.borderColor = "#ffb86c"; // Orange-ish for Gemma
+                    modelBadge.style.boxShadow = "0 0 10px rgba(255, 184, 108, 0.2)";
+                } else {
+                    modelBadge.style.borderColor = "#bd93f9"; // Purple for Gemini
+                    modelBadge.style.boxShadow = "0 0 10px rgba(189, 147, 249, 0.2)";
+                }
+
+                resultsHeader.style.display = 'flex';
                 resultsArea.style.display = 'flex';
 
             } catch (error) {
-                alert("ERROR:\n" + error.message);
-                console.error(error);
+                alert("Error: " + error.message);
             } finally {
                 btn.innerText = "Analyze Code";
                 btn.disabled = false;
